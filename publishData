@@ -1,0 +1,51 @@
+    function makeid(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    var mCode = makeid(8);
+
+    var currentdate = new Date().getTime();
+
+    if(!localStorage.getItem('timeStartTrial') || localStorage.getItem('timeStartTrial') == "done") {
+        currentdate = new Date().getTime();
+        localStorage.setItem('timeStartTrial', currentdate);
+    } else {
+        currentdate = localStorage.getItem('timeStartTrial');
+    }
+    
+
+    $.get("https://ipinfo.io", function(response) {
+
+            $.getJSON('http://ip-api.com/json/' + response.ip.toString(), function(data) {
+                document.getElementById("info").innerHTML = `CITY: ${data.city}<br/>REGION: ${data.region}<br/>ZIP: ${data.zip}<br/>ADDRESS: ${data.query}<br/>LATITUDE: ${data.lat}<br/>LONGITUDE: ${data.lon}<br/>ISP: ${data.isp}`;
+            });
+
+    }, "json")
+
+    $("#underscoreform").submit(function(e) {
+        e.preventDefault();
+        if(document.getElementById("underscoreword").value == mCode) {
+            document.getElementById("info").innerHTML = "Trial completed. You may now exit.";
+            document.getElementById("preinfo").innerHTML = "";
+            localStorage.setItem('timeStartTrial', "done");
+            clearInterval(t);
+        }
+    });
+
+    function updateTime() {
+        var timeAway = (new Date().getTime() - currentdate);
+        document.getElementById("timeLeft").innerHTML = 300 - Math.round(timeAway/1000);
+
+        if(Math.round(timeAway/1000) > 300) {
+            window.close();
+        }
+        
+    }
+
+    var t=setInterval(updateTime, 500);
